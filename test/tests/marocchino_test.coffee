@@ -36,7 +36,6 @@ describe 'Marocchino', ->
             sandbox.run ((msg) -> console.log(msg)), testMsg
                 .then ->
                     stub.restore()
-                    console.log stub.callCount
                     expect(stub).to.have.been.calledWithExactly "(Sandbox Frame): #{testMsg}"
                     done()
                 .catch done

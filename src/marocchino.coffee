@@ -84,12 +84,9 @@ class Sandbox
                 argString = ""
             script.text = """
                 try {
-                    console.log('calling fn');
                     var res = (#{fn.toString()})(#{argString});
                     parent.postMessage({ action: "done", result: res, runId: "#{runId}" }, '*');
                 } catch (e) {
-                    console.log('error');
-                    debugger
                     parent.postMessage({ action: "error", error: { message: e.message, stack: e.stack, name: e.name }, runId: "#{runId}" }, '*');
                 }
             """
@@ -106,7 +103,6 @@ class Sandbox
                     else if data.action is 'done'
                         resolve data.result
             window.addEventListener 'message', handleMessage
-            console.log 'Adding script to page.'
             @iframe.contentDocument.head.appendChild script
 
     cleanUp: ->
