@@ -52,6 +52,8 @@ module.exports = (config) ->
         frameworks: [
             'mocha'
             'chai-as-promised'
+            'sinon-chai'
+            'sinon'
             'chai'
         ]
 
@@ -62,6 +64,8 @@ module.exports = (config) ->
             'karma-firefox-launcher'
             'karma-chrome-launcher'
             'karma-chai-as-promised'
+            'karma-sinon-chai'
+            'karma-sinon'
             'karma-chai'
         ]
 

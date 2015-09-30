@@ -49,6 +49,11 @@ if not Function.prototype.bind
 
 
 class Sandbox
+
+    handleLogMessage = (evt) ->
+        if evt.data.action is 'console.log'
+            console.log "(Sandbox Frame): #{evt.data.message}"
+
     constructor: ->
         # Create the iframe.
         @iframe = document.createElement 'iframe'
@@ -57,16 +62,14 @@ class Sandbox
     initialize: ->
         # Append the iframe.
         document.body.appendChild @iframe
-
-    run: (fn, args) ->
+        # Delegate console.log to parent frame.
+        window.addEventListener 'message', handleLogMessage
+        # Add script to override console.log in sandbox frame.
+        override = ->
+            window.console.log = (msg) ->
+                parent.postMessage { action: 'console.log', message: msg }, '*'
         script = document.createElement 'script'
-        if args instanceof Array
-            argString = args.reduce ((memo, val) -> if memo then "#{memo},#{JSON.stringify val}" else JSON.stringify(val)), ""
-        else if args?
-            argString = JSON.stringify args
-        else
-            argString = ""
-        script.text = "(#{fn.toString()})(#{argString})"
+        script.text = "(#{override.toString()})();"
         @iframe.contentDocument.head.appendChild script
 
     run: (fn, args) ->
@@ -106,12 +109,16 @@ class Sandbox
             console.log 'Adding script to page.'
             @iframe.contentDocument.head.appendChild script
 
+    cleanUp: ->
+        window.removeEventListener 'message', handleLogMessage
+
 marocchino.create = ->
     sandbox = new Sandbox()
     sandbox.initialize()
     return sandbox
 
 marocchino.remove = (sandbox) ->
+    sandbox.cleanUp()
     document.body.removeChild sandbox.iframe
 
 # Export this as a global for use in the browser.
