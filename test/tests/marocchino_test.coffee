@@ -30,15 +30,13 @@ describe 'Marocchino', ->
             , testValue
             expect(sandbox.iframe.contentWindow._testValue).to.equal testValue
 
-        it 'should log the iframes console.log messages in the parent frames context', (done) ->
+        it 'should log the iframes console.log messages in the parent frames context', ->
             stub = sinon.stub console, 'log'
             testMsg = 'This is a test.'
             sandbox.run ((msg) -> console.log(msg)), testMsg
                 .then ->
                     stub.restore()
                     expect(stub).to.have.been.calledWithExactly "(Sandbox Frame): #{testMsg}"
-                    done()
-                .catch done
 
         it 'should catch exceptions from inside the frame and throw them in the parent context', ->
             expect(sandbox.run -> throw new Error('test error')).to.be.rejectedWith('test error')
