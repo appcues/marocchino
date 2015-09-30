@@ -54,8 +54,5 @@ marocchino.create = ->
 marocchino.remove = (sandbox) ->
     document.body.removeChild sandbox.iframe
 
-# Export this as a node module or a global, depending on the context.
-if module?.exports?
-    module.exports = marocchino
-else
-    window.marocchino = marocchino
+# Export this as a global for use in the browser.
+window.marocchino = marocchino

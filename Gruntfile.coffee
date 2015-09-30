@@ -1,14 +1,16 @@
 module.exports = (grunt) ->
     grunt.initConfig
-        coffee:
-            compile:
+        browserify:
+            dist:
                 files:
-                    'lib/marocchino.js': ['src/*.coffee']
+                    'lib/marocchino.js': ['src/**/*.coffee']
+                options:
+                    transform: ['coffeeify']
         karma:
             unit:
                 configFile: 'test/karma.conf.coffee'
 
-    grunt.loadNpmTasks 'grunt-contrib-coffee'
+    grunt.loadNpmTasks 'grunt-browserify'
     grunt.loadNpmTasks 'grunt-karma'
 
-    grunt.registerTask 'default', ['coffee', 'karma']
+    grunt.registerTask 'default', ['browserify', 'karma']
