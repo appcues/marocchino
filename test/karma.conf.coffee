@@ -51,6 +51,8 @@ module.exports = (config) ->
 
         frameworks: [
             'mocha'
+            'chai-as-promised'
+            'chai'
         ]
 
         plugins: [
@@ -59,6 +61,8 @@ module.exports = (config) ->
             'karma-phantomjs-launcher'
             'karma-firefox-launcher'
             'karma-chrome-launcher'
+            'karma-chai-as-promised'
+            'karma-chai'
         ]
 
         reporters: [

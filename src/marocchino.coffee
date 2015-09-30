@@ -1,3 +1,6 @@
+Promise = require('es6-promise').Promise
+uuid = require 'uuid'
+
 marocchino = {}
 
 # Array.reduce polyfill.
@@ -65,6 +68,43 @@ class Sandbox
             argString = ""
         script.text = "(#{fn.toString()})(#{argString})"
         @iframe.contentDocument.head.appendChild script
+
+    run: (fn, args) ->
+        runId = uuid.v4()
+        new Promise (resolve, reject) =>
+            script = document.createElement 'script'
+            if args instanceof Array
+                argString = args.reduce ((memo, val) -> if memo then "#{memo},#{JSON.stringify val}" else JSON.stringify(val)), ""
+            else if args?
+                argString = JSON.stringify args
+            else
+                argString = ""
+            script.text = """
+                try {
+                    console.log('calling fn');
+                    var res = (#{fn.toString()})(#{argString});
+                    parent.postMessage({ action: "done", result: res, runId: "#{runId}" }, '*');
+                } catch (e) {
+                    console.log('error');
+                    debugger
+                    parent.postMessage({ action: "error", error: { message: e.message, stack: e.stack, name: e.name }, runId: "#{runId}" }, '*');
+                }
+            """
+            handleMessage = (evt) ->
+                {data} = evt
+                if data.runId is runId
+                    window.removeEventListener 'message', handleMessage
+                    if data.action is 'error'
+                        # Rebuild the error object.
+                        err = new Error(data.error.message)
+                        err.stack = data.error.stack
+                        err.name = data.error.name
+                        reject err
+                    else if data.action is 'done'
+                        resolve data.result
+            window.addEventListener 'message', handleMessage
+            console.log 'Adding script to page.'
+            @iframe.contentDocument.head.appendChild script
 
 marocchino.create = ->
     sandbox = new Sandbox()
