@@ -37,6 +37,8 @@ module.exports = (config) ->
         # - PhantomJS
         browsers: [
             'PhantomJS'
+            'Chrome'
+            'Firefox'
         ]
 
         # Continuous Integration mode
@@ -55,6 +57,8 @@ module.exports = (config) ->
             'karma-mocha'
             'karma-coffee-preprocessor'
             'karma-phantomjs-launcher'
+            'karma-firefox-launcher'
+            'karma-chrome-launcher'
         ]
 
         reporters: [

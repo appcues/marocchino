@@ -25,6 +25,26 @@ if not Array.prototype.reduce
                 value = callback value, t[i], i, t
         return value
 
+# Polyfill for Function.prototype.bind.
+# Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind?redirectlocale=en-US&redirectslug=JavaScript%2FReference%2FGlobal_Objects%2FFunction%2Fbind#Polyfill
+if not Function.prototype.bind
+    Function.prototype.bind = (oThis) ->
+        if typeof @ isnt 'function'
+            # closest thing possible to the ECMAScript 5
+            # internal IsCallable function
+            throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable')
+        aArgs = Array.prototype.slice.call(arguments, 1)
+        fToBind = @
+        fNOP = ->
+        fBound = ->
+            return fToBind.apply (if @ instanceof fNOP then @ else oThis), aArgs.concat(Array.prototype.slice.call(arguments))
+        if @.prototype
+            # native functions don't have a prototype
+            fNOP.prototype = @.prototype
+        fBound.prototype = new fNOP()
+        return fBound
+
+
 class Sandbox
     constructor: ->
         # Create the iframe.
