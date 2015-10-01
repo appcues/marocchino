@@ -54,6 +54,11 @@ class Sandbox
         if evt.data.action is 'console.log'
             console.log "(Sandbox Frame): #{evt.data.message}"
 
+    appendExecutingScriptTag = (code, el) ->
+        script = document.createElement 'script'
+        script.text = code
+        el.appendChild script
+
     constructor: ->
         # Create the iframe.
         @iframe = document.createElement 'iframe'
@@ -62,48 +67,51 @@ class Sandbox
     initialize: ->
         # Append the iframe.
         document.body.appendChild @iframe
+
+        # Tells us when the iframe is loaded.
+        @ready = new Promise (resolve, reject) =>
+            @iframe.contentWindow.onload = =>
+                # Add script to override console.log in sandbox frame, unless we're loading a page in the frame.
+                override = ->
+                    window.console.log = (msg) ->
+                        parent.postMessage { action: 'console.log', message: msg }, '*'
+                appendExecutingScriptTag "(#{override.toString()})();", @iframe.contentDocument.head
+                resolve()
+
         # Delegate console.log to parent frame.
         window.addEventListener 'message', handleLogMessage
-        # Add script to override console.log in sandbox frame.
-        override = ->
-            window.console.log = (msg) ->
-                parent.postMessage { action: 'console.log', message: msg }, '*'
-        script = document.createElement 'script'
-        script.text = "(#{override.toString()})();"
-        @iframe.contentDocument.head.appendChild script
 
     run: (fn, args) ->
         runId = uuid.v4()
-        new Promise (resolve, reject) =>
-            script = document.createElement 'script'
-            if args instanceof Array
-                argString = args.reduce ((memo, val) -> if memo then "#{memo},#{JSON.stringify val}" else JSON.stringify(val)), ""
-            else if args?
-                argString = JSON.stringify args
-            else
-                argString = ""
-            script.text = """
-                try {
-                    var res = (#{fn.toString()})(#{argString});
-                    parent.postMessage({ action: "done", result: res, runId: "#{runId}" }, '*');
-                } catch (e) {
-                    parent.postMessage({ action: "error", error: { message: e.message, stack: e.stack, name: e.name }, runId: "#{runId}" }, '*');
-                }
-            """
-            handleMessage = (evt) ->
-                {data} = evt
-                if data.runId is runId
-                    window.removeEventListener 'message', handleMessage
-                    if data.action is 'error'
-                        # Rebuild the error object.
-                        err = new Error(data.error.message)
-                        err.stack = data.error.stack
-                        err.name = data.error.name
-                        reject err
-                    else if data.action is 'done'
-                        resolve data.result
-            window.addEventListener 'message', handleMessage
-            @iframe.contentDocument.head.appendChild script
+        @ready.then =>
+            new Promise (resolve, reject) =>
+                if args instanceof Array
+                    argString = args.reduce ((memo, val) -> if memo then "#{memo},#{JSON.stringify val}" else JSON.stringify(val)), ""
+                else if args?
+                    argString = JSON.stringify args
+                else
+                    argString = ""
+                handleMessage = (evt) ->
+                    {data} = evt
+                    if data.runId is runId
+                        window.removeEventListener 'message', handleMessage
+                        if data.action is 'error'
+                            # Rebuild the error object.
+                            err = new Error(data.error.message)
+                            err.stack = data.error.stack
+                            err.name = data.error.name
+                            reject err
+                        else if data.action is 'done'
+                            resolve data.result
+                window.addEventListener 'message', handleMessage
+                appendExecutingScriptTag """
+                    try {
+                        var res = (#{fn.toString()})(#{argString});
+                        parent.postMessage({ action: "done", result: res, runId: "#{runId}" }, '*');
+                    } catch (e) {
+                        parent.postMessage({ action: "error", error: { message: e.message, stack: e.stack, name: e.name }, runId: "#{runId}" }, '*');
+                    }
+                """, @iframe.contentDocument.head
 
     cleanUp: ->
         window.removeEventListener 'message', handleLogMessage
