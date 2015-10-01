@@ -8,6 +8,8 @@ module.exports = (config) ->
         files: [
             'lib/marocchino.js'
 
+            { pattern: 'test/blank.html', included: false }
+            { pattern: 'test/lib/global.js', included: false }
             'test/helper.coffee'
             'test/**/*_test.coffee'
         ]

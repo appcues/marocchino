@@ -5,6 +5,16 @@ describe 'Marocchino', ->
             expect(document.getElementsByClassName('marocchino-frame')).to.have.length 1
             marocchino.remove s
 
+        it 'should load specified resources into the frame through a page specified by src', ->
+            s = marocchino.create({
+                src: '/base/test/blank.html'
+            })
+            s.run ->
+                return window.MarocchinoTestGlobal
+            .then (chaiVersion) ->
+                expect(chaiVersion).to.be.ok
+                marocchino.remove s
+
     describe '#remove', ->
         it 'should remove the iframe from the current test page', ->
             s = marocchino.create()
@@ -15,7 +25,9 @@ describe 'Marocchino', ->
         sandbox = null
 
         beforeEach ->
-            sandbox = marocchino.create()
+            sandbox = marocchino.create({
+                src: '/base/test/blank.html'
+            })
 
         afterEach ->
             marocchino.remove sandbox
@@ -42,6 +54,15 @@ describe 'Marocchino', ->
         it 'should catch exceptions from inside the frame and throw them in the parent context', ->
             expect(sandbox.run -> throw new Error('test error')).to.be.rejectedWith('test error')
 
-        it 'should be able to manipulate the DOM inside the frame'
+        it 'should be able to manipulate and make assertions about the DOM inside the frame', ->
+            sandbox.run ->
+                div = document.createElement 'div'
+                div.className = 'foo'
+                div.textContent = 'Foo'
+                document.body.appendChild div
+                expect(document.querySelectorAll('.foo')).to.have.length 1
+                expect(document.querySelector('.foo').textContent).to.equal('Foo')
+                return
+
         it 'should do the right thing with asynchronous functions'
         it 'should keep all variables created within the same sandbox in scope, even if they are declared in different functions'

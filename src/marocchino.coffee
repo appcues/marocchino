@@ -64,7 +64,9 @@ class Sandbox
         @iframe = document.createElement 'iframe'
         @iframe.className = 'marocchino-frame'
 
-    initialize: ->
+    initialize: (options={}) ->
+        if options.src?
+            @iframe.src = options.src
         # Append the iframe.
         document.body.appendChild @iframe
 
@@ -116,9 +118,9 @@ class Sandbox
     cleanUp: ->
         window.removeEventListener 'message', handleLogMessage
 
-marocchino.create = ->
+marocchino.create = (options) ->
     sandbox = new Sandbox()
-    sandbox.initialize()
+    sandbox.initialize(options)
     return sandbox
 
 marocchino.remove = (sandbox) ->
