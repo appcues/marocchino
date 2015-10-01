@@ -109,5 +109,3 @@ describe 'Marocchino', ->
                     throw new Error(val)
             , testValue)
             ).to.eventually.be.rejectedWith testValue
-
-        it 'should keep all variables created within the same sandbox in scope, even if they are declared in different functions'
