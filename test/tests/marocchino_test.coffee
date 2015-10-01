@@ -73,6 +73,15 @@ describe 'Marocchino', ->
             , testValue).then (res) ->
                 expect(res).to.equal testValue
 
+        it 'should handle an error that occurs inside an asynchronous function', ->
+            testValue = 'error!'
+            expect(sandbox.run((val, done) ->
+                fn = ->
+                    throw new Error(val)
+                window.setTimeout fn, 5
+            , testValue)
+            ).to.eventually.be.rejectedWith testValue
+
         it 'should return the resolved value of a function that returns a promise', ->
             testValue = 'resolved!'
             sandbox.run((val) ->
@@ -90,6 +99,14 @@ describe 'Marocchino', ->
                     fn = ->
                         reject(new Error(val))
                     window.setTimeout fn, 5
+            , testValue)
+            ).to.eventually.be.rejectedWith testValue
+
+        it 'should handle an error that occurs inside the promise function', ->
+            testValue = 'error!'
+            expect(sandbox.run((val) ->
+                new Promise (resolve, reject) ->
+                    throw new Error(val)
             , testValue)
             ).to.eventually.be.rejectedWith testValue
 

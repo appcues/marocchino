@@ -117,14 +117,19 @@ class Sandbox
                 appendExecutingScriptTag """
                     try {
                         var isAsync = #{isAsync};
-                        function _done(result, e) {
+                        var _done = function(result, e) {
                             if(typeof e !== "undefined" && e !== null) {
                                 parent.postMessage({ action: "error", error: { message: e.message, stack: e.stack, name: e.name }, runId: "#{runId}" }, '*');
                             }
                             else {
                                 parent.postMessage({ action: "done", result: result, runId: "#{runId}" }, '*');
                             }
-                        }
+                        };
+                        // Try catching errors that occur in async functions.
+                        window.addEventListener('error', function (evt) {
+                            var errObj = evt.error ? evt.error : { name: "Error", stack: evt.filename + ":" + evt.lineno + ":" + evt.colno, message: evt.message }
+                            _done(null, errObj);
+                        });
                         var res = (#{fn.toString()})(#{argString}#{if numArgs > 0 then ', _done' else '_done'});
                         if(!isAsync) {
                             // See if we've got a promise here.
