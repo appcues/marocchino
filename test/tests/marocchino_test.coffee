@@ -64,5 +64,33 @@ describe 'Marocchino', ->
                 expect(document.querySelector('.foo').textContent).to.equal('Foo')
                 return
 
-        it 'should do the right thing with asynchronous functions'
+        it 'should return the result of an asynchronous function', ->
+            testValue = 'testing!'
+            sandbox.run((val, done) ->
+                fn = ->
+                    done(val)
+                window.setTimeout fn, 5
+            , testValue).then (res) ->
+                expect(res).to.equal testValue
+
+        it 'should return the resolved value of a function that returns a promise', ->
+            testValue = 'resolved!'
+            sandbox.run((val) ->
+                new Promise (resolve, reject) ->
+                    fn = ->
+                        resolve(val)
+                    window.setTimeout fn, 5
+            , testValue).then (res) ->
+                expect(res).to.equal testValue
+
+        it 'should reject if the returned promise rejects', ->
+            testValue = 'rejected!'
+            expect(sandbox.run((val) ->
+                new Promise (resolve, reject) ->
+                    fn = ->
+                        reject(new Error(val))
+                    window.setTimeout fn, 5
+            , testValue)
+            ).to.eventually.be.rejectedWith testValue
+
         it 'should keep all variables created within the same sandbox in scope, even if they are declared in different functions'

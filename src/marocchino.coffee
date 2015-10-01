@@ -87,9 +87,12 @@ class Sandbox
         runId = uuid.v4()
         @ready.then =>
             new Promise (resolve, reject) =>
+                numArgs = 0
                 if args instanceof Array
+                    numArgs = args.length
                     argString = args.reduce ((memo, val) -> if memo then "#{memo},#{JSON.stringify val}" else JSON.stringify(val)), ""
                 else if args?
+                    numArgs = 1
                     argString = JSON.stringify args
                 else
                     argString = ""
@@ -106,12 +109,38 @@ class Sandbox
                         else if data.action is 'done'
                             resolve data.result
                 window.addEventListener 'message', handleMessage
+
+                # If there is an extra argument defined on the function vs what is passed,
+                # then we assume its the place for the done callback and we treat this as
+                # an asychronous call.
+                isAsync = fn.length is (numArgs + 1)
                 appendExecutingScriptTag """
                     try {
-                        var res = (#{fn.toString()})(#{argString});
-                        parent.postMessage({ action: "done", result: res, runId: "#{runId}" }, '*');
+                        var isAsync = #{isAsync};
+                        function _done(result, e) {
+                            if(typeof e !== "undefined" && e !== null) {
+                                parent.postMessage({ action: "error", error: { message: e.message, stack: e.stack, name: e.name }, runId: "#{runId}" }, '*');
+                            }
+                            else {
+                                parent.postMessage({ action: "done", result: result, runId: "#{runId}" }, '*');
+                            }
+                        }
+                        var res = (#{fn.toString()})(#{argString}#{if numArgs > 0 then ', _done' else '_done'});
+                        if(!isAsync) {
+                            // See if we've got a promise here.
+                            if (typeof res !== "undefined" && res !== null && typeof res.then === 'function') {
+                                // We've got something that looks promise like.
+                                res.then(_done, function(err) {
+                                    debugger
+                                    _done(null, err)
+                                });
+                            }
+                            else {
+                                _done(res);
+                            }
+                        }
                     } catch (e) {
-                        parent.postMessage({ action: "error", error: { message: e.message, stack: e.stack, name: e.name }, runId: "#{runId}" }, '*');
+                        _done(null, e)
                     }
                 """, @iframe.contentDocument.head
 

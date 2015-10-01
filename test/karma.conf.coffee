@@ -10,6 +10,7 @@ module.exports = (config) ->
 
             { pattern: 'test/blank.html', included: false }
             { pattern: 'test/lib/global.js', included: false }
+            { pattern: 'node_modules/es6-promise/dist/es6-promise.js', included: false }
             'test/helper.coffee'
             'test/**/*_test.coffee'
         ]
