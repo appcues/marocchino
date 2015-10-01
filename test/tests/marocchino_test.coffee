@@ -109,3 +109,12 @@ describe 'Marocchino', ->
                     throw new Error(val)
             , testValue)
             ).to.eventually.be.rejectedWith testValue
+
+        # For some weird reason mocha seems to clean up the last test before the
+        # promise resolves or something. Either way, this is causing Chrome to
+        # reload the window, according to karma. Placing a pending test at the
+        # seems to make this not happen. Hacky but it appears to work. I'll get
+        # around to figuring this out eventually. It seems like it's a timing
+        # issue because running the test in debug mode seems to make it go away
+        # as well.
+        it 'should do other things'
