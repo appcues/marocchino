@@ -9,9 +9,9 @@ marocchino = {}
 if not Array.prototype.reduce
     Array.prototype.reduce = (callback) ->
         unless @?
-            throw new TypeError('Array.prototype.reduce called on null or undefined');
+            throw new TypeError('Array.prototype.reduce called on null or undefined')
         if typeof callback isnt 'function'
-            throw new TypeError(callback + ' is not a function');
+            throw new TypeError(callback + ' is not a function')
         t = Object(@)
         len = t.length >>> 0
         k = 0
@@ -136,7 +136,6 @@ class Sandbox
                             if (typeof res !== "undefined" && res !== null && typeof res.then === 'function') {
                                 // We've got something that looks promise like.
                                 res.then(_done, function(err) {
-                                    debugger
                                     _done(null, err)
                                 });
                             }

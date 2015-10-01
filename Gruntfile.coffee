@@ -1,5 +1,20 @@
 module.exports = (grunt) ->
     grunt.initConfig
+
+        coffeelint:
+            app: ['Gruntfile.coffee', 'src/**/*.coffee', 'test/**/*.coffee']
+            options:
+                indentation:
+                    value: 4
+                    level: 'error'
+
+                max_line_length:
+                    value: 80
+                    level: 'ignore'
+
+                no_backticks:
+                    level: 'warn'
+
         browserify:
             dist:
                 files:
@@ -12,5 +27,6 @@ module.exports = (grunt) ->
 
     grunt.loadNpmTasks 'grunt-browserify'
     grunt.loadNpmTasks 'grunt-karma'
+    grunt.loadNpmTasks 'grunt-coffeelint'
 
-    grunt.registerTask 'default', ['browserify', 'karma']
+    grunt.registerTask 'default', ['coffeelint', 'browserify', 'karma']
