@@ -1,4 +1,5 @@
 module.exports = (config) ->
+    isCI = process.env['WERCKER'] or process.env['CI']
 
     baseConfig =
         # base path, that will be used to resolve files and exclude
@@ -16,7 +17,7 @@ module.exports = (config) ->
         ]
 
         # web server port
-        port: 8080
+        port: 8081
 
         # cli runner port
         runnerPort: 9100
@@ -75,5 +76,38 @@ module.exports = (config) ->
         reporters: [
             'dots'
         ]
+
+    if isCI
+        # Config for Open Sauce.
+        baseConfig.plugins.push 'karma-sauce-launcher'
+        baseConfig.sauceLabs =
+            testName: 'Marocchino Unit Tests'
+        baseConfig.customLaunchers =
+            sl_firefox_41:
+                base: 'SauceLabs',
+                browserName: 'firefox',
+                version: '41'
+            sl_chrome_45:
+                base: 'SauceLabs',
+                browserName: 'chrome',
+                version: '45'
+            sl_safari_81:
+                base: 'SauceLabs',
+                browserName: 'safari',
+                version: '8.1'
+                platform: 'OS X 10.11'
+            sl_ie_9:
+                base: 'SauceLabs'
+                browserName: 'internet explorer'
+                version: '9.0'
+                platform: 'Windows 7'
+            sl_ie_10:
+                base: 'SauceLabs'
+                browserName: 'internet explorer'
+                version: '10.0'
+                platform: 'Windows 8'
+        baseConfig.reporters.push 'saucelabs'
+        baseConfig.browsers = Object.keys baseConfig.customLaunchers
+        baseConfig.singleRun = true
 
     config.set baseConfig
