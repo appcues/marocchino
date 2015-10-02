@@ -29,4 +29,6 @@ module.exports = (grunt) ->
     grunt.loadNpmTasks 'grunt-karma'
     grunt.loadNpmTasks 'grunt-coffeelint'
 
-    grunt.registerTask 'default', ['coffeelint', 'browserify', 'karma']
+    grunt.registerTask 'build', ['coffeelint', 'browserify']
+
+    grunt.registerTask 'default', ['build', 'karma']

@@ -1,0 +1,9 @@
+box: node
+
+build:
+    steps:
+        # A step that executes `npm install` command
+        - npm-install
+        - grunt:
+            tasks: build
+        - npm-test
