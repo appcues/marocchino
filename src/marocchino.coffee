@@ -68,16 +68,16 @@ class Sandbox
         if options.src?
             @iframe.src = options.src
         # Append the iframe.
-        document.body.appendChild @iframe
+        document.getElementsByTagName('body')[0].appendChild @iframe
 
         # Tells us when the iframe is loaded.
         @ready = new Promise (resolve, reject) =>
-            @iframe.contentWindow.onload = =>
+            @iframe.addEventListener 'load', =>
                 # Add script to override console.log in sandbox frame, unless we're loading a page in the frame.
                 override = ->
                     window.console.log = (msg) ->
                         parent.postMessage { action: 'console.log', message: msg }, '*'
-                appendExecutingScriptTag "(#{override.toString()})();", @iframe.contentDocument.head
+                appendExecutingScriptTag "(#{override.toString()})();", @iframe.contentWindow.document.getElementsByTagName('head')[0]
                 resolve()
 
         # Delegate console.log to parent frame.
@@ -146,7 +146,7 @@ class Sandbox
                     } catch (e) {
                         _done(null, e)
                     }
-                """, @iframe.contentDocument.head
+                """, @iframe.contentWindow.document.getElementsByTagName('head')[0]
 
     cleanUp: ->
         window.removeEventListener 'message', handleLogMessage
@@ -158,7 +158,7 @@ marocchino.create = (options) ->
 
 marocchino.remove = (sandbox) ->
     sandbox.cleanUp()
-    document.body.removeChild sandbox.iframe
+    document.getElementsByTagName('body')[0].removeChild sandbox.iframe
 
 # Export this as a global for use in the browser.
 window.marocchino = marocchino

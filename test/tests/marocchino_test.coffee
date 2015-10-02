@@ -59,7 +59,7 @@ describe 'Marocchino', ->
                 div = document.createElement 'div'
                 div.className = 'foo'
                 div.textContent = 'Foo'
-                document.body.appendChild div
+                document.getElementsByTagName('body')[0].appendChild div
                 expect(document.querySelectorAll('.foo')).to.have.length 1
                 expect(document.querySelector('.foo').textContent).to.equal('Foo')
                 return
