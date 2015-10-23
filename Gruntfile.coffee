@@ -25,9 +25,14 @@ module.exports = (grunt) ->
             unit:
                 configFile: 'test/karma.conf.coffee'
 
+        release:
+            options:
+                commitMessage: 'Release <%= version %>.'
+
     grunt.loadNpmTasks 'grunt-browserify'
     grunt.loadNpmTasks 'grunt-karma'
     grunt.loadNpmTasks 'grunt-coffeelint'
+    grunt.loadNpmTasks 'grunt-release'
 
     grunt.registerTask 'build', ['coffeelint', 'browserify']
 
