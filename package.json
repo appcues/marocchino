@@ -42,7 +42,7 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "es6-promise": "^3.0.2",
+    "es6-promise": "^4.0.0",
     "uuid": "^2.0.1"
   }
 }
