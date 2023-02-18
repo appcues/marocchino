@@ -39,7 +39,7 @@
     "karma-sinon-chai": "^1.1.0",
     "mocha": "^2.3.2",
     "phantomjs": "^1.9.18",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^3.0.0"
   },
   "dependencies": {
     "es6-promise": "^3.0.2",
