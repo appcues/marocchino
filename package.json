@@ -24,7 +24,7 @@
     "grunt-cli": "^0.1.13",
     "grunt-coffeelint": "0.0.13",
     "grunt-contrib-coffee": "^0.13.0",
-    "grunt-karma": "^0.12.1",
+    "grunt-karma": "^4.0.0",
     "grunt-release": "^0.13.0",
     "karma": "^0.13.9",
     "karma-chai": "^0.1.0",
